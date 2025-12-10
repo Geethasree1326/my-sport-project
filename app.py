@@ -1,176 +1,156 @@
-from flask import Flask, render_template, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from flask import Flask, render_template, request, jsonify
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sports.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
-# ------------------- Models -------------------
+# ----- Sports -----
+sports = [
+    {"id": 1, "name": "Cricket"},
+    {"id": 2, "name": "Football"},
+    {"id": 3, "name": "Kabaddi"}
+]
 
-class Sport(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    teams = db.relationship('Team', backref='sport', lazy=True)
-    matches = db.relationship('Match', backref='sport', lazy=True)
+# ----- Teams -----
+teams = {
+    1: [  # Cricket IPL teams
+        {"id": 1, "name": "Chennai Super Kings", "short_name": "CSK", "logo_color": "#f4c430"},
+        {"id": 2, "name": "Mumbai Indians", "short_name": "MI", "logo_color": "#1e90ff"},
+        {"id": 3, "name": "Royal Challengers Bangalore", "short_name": "RCB", "logo_color": "#ff0000"},
+        {"id": 4, "name": "Kolkata Knight Riders", "short_name": "KKR", "logo_color": "#4b0082"},
+    ],
+    2: [  # Football ISL teams
+        {"id": 5, "name": "Bengaluru FC", "short_name": "BFC", "logo_color": "#00bfff"},
+        {"id": 6, "name": "ATK Mohun Bagan", "short_name": "ATKMB", "logo_color": "#228b22"},
+    ],
+    3: [  # Kabaddi teams
+        {"id": 7, "name": "Jaipur Pink Panthers", "short_name": "JPP", "logo_color": "#ff69b4"},
+        {"id": 8, "name": "Patna Pirates", "short_name": "PP", "logo_color": "#ff8c00"},
+    ],
+}
 
-class Team(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    sport_id = db.Column(db.Integer, db.ForeignKey('sport.id'), nullable=False)
-    players = db.relationship('Player', backref='team', lazy=True)
+# ----- Matches -----
+matches = [
+    # Cricket
+    {
+        "id": 1,
+        "sport": sports[0],
+        "team1": teams[1][0],
+        "team2": teams[1][1],
+        "team1_score": "185/4",
+        "team2_score": "142/6",
+        "match_date": datetime.now(),
+        "match_time": "19:30",
+        "status": "live",
+        "is_live": True,
+        "tournament": "IPL 2025",
+        "venue": "M.A. Chidambaram Stadium",
+        "match_details": "Match 7, Semi-Final"
+    },
+    {
+        "id": 2,
+        "sport": sports[0],
+        "team1": teams[1][2],
+        "team2": teams[1][3],
+        "team1_score": "210/6",
+        "team2_score": "198/7",
+        "match_date": datetime.now() + timedelta(days=1),
+        "match_time": "16:00",
+        "status": "upcoming",
+        "is_live": False,
+        "tournament": "IPL 2025",
+        "venue": "M. Chinnaswamy Stadium",
+        "match_details": "Match 8"
+    },
+    # Football
+    {
+        "id": 3,
+        "sport": sports[1],
+        "team1": teams[2][0],
+        "team2": teams[2][1],
+        "team1_score": "2",
+        "team2_score": "1",
+        "match_date": datetime.now(),
+        "match_time": "18:00",
+        "status": "completed",
+        "is_live": False,
+        "tournament": "Indian Super League",
+        "venue": "Sree Kanteerava Stadium",
+        "match_details": "Semi-Final"
+    },
+    # Kabaddi
+    {
+        "id": 4,
+        "sport": sports[2],
+        "team1": teams[3][0],
+        "team2": teams[3][1],
+        "team1_score": "35",
+        "team2_score": "28",
+        "match_date": datetime.now() + timedelta(days=2),
+        "match_time": "20:00",
+        "status": "upcoming",
+        "is_live": False,
+        "tournament": "Pro Kabaddi League",
+        "venue": "Sawai Mansingh Stadium",
+        "match_details": "Match 12"
+    },
+]
 
-class Match(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sport_id = db.Column(db.Integer, db.ForeignKey('sport.id'), nullable=False)
-    team1_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
-    team2_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
-    team1_score = db.Column(db.String(20), default='')
-    team2_score = db.Column(db.String(20), default='')
-    match_details = db.Column(db.String(100))
-    status = db.Column(db.String(20), default='upcoming')
-    venue = db.Column(db.String(100))
-    is_live = db.Column(db.Boolean, default=False)
+# ----- Players -----
+players = [
+    # Cricket players
+    {"name": "MS Dhoni", "team": "CSK", "jersey": 7, "position": "Batsman", "nationality": "India", "sport": "Cricket", "runs": 478, "wickets": 0, "matches": 7},
+    {"name": "Rohit Sharma", "team": "MI", "jersey": 45, "position": "Batsman", "nationality": "India", "sport": "Cricket", "runs": 512, "wickets": 0, "matches": 7},
+    # Football players
+    {"name": "Sunil Chhetri", "team": "BFC", "jersey": 11, "position": "Forward", "nationality": "India", "sport": "Football", "goals": 6, "assists": 2, "matches": 5},
+    {"name": "Roy Krishna", "team": "ATKMB", "jersey": 9, "position": "Forward", "nationality": "Fiji", "sport": "Football", "goals": 5, "assists": 3, "matches": 5},
+]
 
-    team1 = db.relationship('Team', foreign_keys=[team1_id])
-    team2 = db.relationship('Team', foreign_keys=[team2_id])
+# ----------------- ROUTES -----------------
 
-class Player(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
-    position = db.Column(db.String(20))
-    nationality = db.Column(db.String(30))
-    matches_played = db.Column(db.Integer, default=0)
-    runs_scored = db.Column(db.Integer, default=0)
-    wickets_taken = db.Column(db.Integer, default=0)
-
-# ------------------- Sample Data -------------------
-
-def create_sample_data():
-    db.drop_all()
-    db.create_all()
-
-    # Sports
-    cricket = Sport(name='Cricket')
-    football = Sport(name='Football')
-    db.session.add_all([cricket, football])
-    db.session.commit()
-
-    # Teams
-    team1 = Team(name='Mumbai Indians', sport=cricket)
-    team2 = Team(name='Chennai Super Kings', sport=cricket)
-    team3 = Team(name='Manchester United', sport=football)
-    team4 = Team(name='Liverpool', sport=football)
-    db.session.add_all([team1, team2, team3, team4])
-    db.session.commit()
-
-    # Players
-    players = [
-        Player(name='Rohit Sharma', team=team1, position='Batsman', nationality='India', matches_played=200, runs_scored=9200),
-        Player(name='Jasprit Bumrah', team=team1, position='Bowler', nationality='India', matches_played=100, wickets_taken=150),
-        Player(name='MS Dhoni', team=team2, position='Wicketkeeper', nationality='India', matches_played=350, runs_scored=10500),
-        Player(name='Cristiano Ronaldo', team=team3, position='Forward', nationality='Portugal', matches_played=500, runs_scored=700),
-        Player(name='Mohamed Salah', team=team4, position='Forward', nationality='Egypt', matches_played=300, runs_scored=450)
-    ]
-    db.session.add_all(players)
-    db.session.commit()
-
-    # Matches
-    match1 = Match(
-        sport=cricket, team1=team1, team2=team2, team1_score='185/4', team2_score='142/6',
-        match_details='IPL Match 1, Semi-Final', status='live', venue='Wankhede Stadium', is_live=True
-    )
-    match2 = Match(
-        sport=football, team1=team3, team2=team4, team1_score='2', team2_score='1',
-        match_details='Premier League Match', status='completed', venue='Old Trafford'
-    )
-    db.session.add_all([match1, match2])
-    db.session.commit()
-
-# ------------------- Routes -------------------
-
-@app.route('/')
+@app.route("/")
 def index():
-    sports = Sport.query.all()
-    matches = Match.query.all()
-    return render_template('index.html', sports=sports, matches=matches)
+    live_matches = [m for m in matches if m["is_live"]]
+    return render_template("index.html", matches=live_matches, sports=sports)
 
-@app.route('/players')
-def players_page():
-    players = Player.query.all()
-    return render_template('player.html', players=players)
+@app.route("/schedule")
+def schedule():
+    sport_filter = request.args.get("sport", "all")
+    if sport_filter != "all":
+        filtered = [m for m in matches if m["sport"]["name"] == sport_filter]
+    else:
+        filtered = matches
+    return render_template("schedule.html", matches=filtered, sports=sports, selected_sport=sport_filter)
 
-@app.route('/schedule')
-def schedule_page():
-    matches = Match.query.order_by(Match.id).all()
-    return render_template('schedule.html', matches=matches)
+@app.route("/players")
+def player_stats():
+    return render_template("players.html", players=players)
 
-@app.route('/admin')
-def admin_page():
-    sports = Sport.query.all()
-    matches = Match.query.all()
-    return render_template('admin.html', sports=sports, matches=matches)
+@app.route("/admin")
+def admin_panel():
+    return render_template("admin.html", matches=matches, sports=sports)
 
-# ------------------- API Routes -------------------
+# ----- API for teams -----
+@app.route("/api/teams/<int:sport_id>")
+def api_teams(sport_id):
+    return jsonify(teams.get(sport_id, []))
 
-@app.route('/api/teams/<int:sport_id>')
-def get_teams(sport_id):
-    teams = Team.query.filter_by(sport_id=sport_id).all()
-    return jsonify([{'id': t.id, 'name': t.name} for t in teams])
-
-@app.route('/api/matches', methods=['POST'])
+# ----- API to create/update/delete match (dummy) -----
+@app.route("/api/matches", methods=["POST"])
 def create_match():
-    data = request.get_json()
-    match = Match(
-        sport_id=data['sport_id'],
-        team1_id=data['team1_id'],
-        team2_id=data['team2_id'],
-        venue=data.get('venue'),
-        match_details=data.get('match_details'),
-        status=data.get('status', 'upcoming'),
-        is_live=data.get('is_live', False)
-    )
-    db.session.add(match)
-    db.session.commit()
-    return jsonify({'success': True})
+    return jsonify({"success": True})
 
-@app.route('/api/matches/<int:match_id>')
+@app.route("/api/matches/<int:match_id>")
 def get_match(match_id):
-    match = Match.query.get(match_id)
-    return jsonify({
-        'id': match.id,
-        'team1': match.team1.name,
-        'team2': match.team2.name,
-        'team1_score': match.team1_score,
-        'team2_score': match.team2_score,
-        'match_details': match.match_details,
-        'status': match.status
-    })
+    match = next((m for m in matches if m["id"] == match_id), None)
+    return jsonify(match)
 
-@app.route('/api/matches/<int:match_id>/score', methods=['PUT'])
+@app.route("/api/matches/<int:match_id>/score", methods=["PUT"])
 def update_score(match_id):
-    data = request.get_json()
-    match = Match.query.get(match_id)
-    match.team1_score = data.get('team1_score', match.team1_score)
-    match.team2_score = data.get('team2_score', match.team2_score)
-    match.match_details = data.get('match_details', match.match_details)
-    match.status = data.get('status', match.status)
-    match.is_live = match.status == 'live'
-    db.session.commit()
-    return jsonify({'success': True})
+    return jsonify({"success": True})
 
-@app.route('/api/matches/<int:match_id>', methods=['DELETE'])
+@app.route("/api/matches/<int:match_id>", methods=["DELETE"])
 def delete_match(match_id):
-    match = Match.query.get(match_id)
-    db.session.delete(match)
-    db.session.commit()
-    return jsonify({'success': True})
+    return jsonify({"success": True})
 
-# ------------------- Run App -------------------
-
-if __name__ == '__main__':
-    with app.app_context():
-        create_sample_data()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
