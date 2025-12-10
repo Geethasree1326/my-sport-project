@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Match Schedule - Sports Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">&#9917;</span>
+                <span class="logo-text">Sports Live</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Live Scores</a>
+                <a href="/players" class="nav-link">Player Stats</a>
+                <a href="/schedule" class="nav-link active">Schedule</a>
+                <a href="/admin" class="nav-link">Admin Panel</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="hero-section">
+            <h1>Match Schedule</h1>
+            <p>View upcoming matches and past results</p>
+        </div>
+
+        <div class="sport-filters">
+            <a href="?sport=all" class="filter-btn {% if selected_sport == 'all' %}active{% endif %}">All Sports</a>
+            {% for sport in sports %}
+            <a href="?sport={{ sport.name }}" class="filter-btn {% if selected_sport == sport.name %}active{% endif %}">
+                {{ sport.name }}
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if matches %}
+        <div class="schedule-container">
+            {% set grouped_matches = {} %}
+            {% for match in matches %}
+                {% set date_key = match.match_date.strftime('%Y-%m-%d') if match.match_date else 'Unknown' %}
+                {% if date_key not in grouped_matches %}
+                    {% set _ = grouped_matches.update({date_key: []}) %}
+                {% endif %}
+                {% set _ = grouped_matches[date_key].append(match) %}
+            {% endfor %}
+            
+            {% for date_key in grouped_matches.keys()|sort %}
+            <div class="schedule-day">
+                <div class="date-header">
+                    <div class="date-badge">
+                        {% if grouped_matches[date_key][0].match_date %}
+                        <span class="day">{{ grouped_matches[date_key][0].match_date.strftime('%d') }}</span>
+                        <span class="month">{{ grouped_matches[date_key][0].match_date.strftime('%b') }}</span>
+                        <span class="weekday">{{ grouped_matches[date_key][0].match_date.strftime('%A') }}</span>
+                        {% else %}
+                        <span class="day">TBD</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="schedule-matches">
+                    {% for match in grouped_matches[date_key] %}
+                    <div class="schedule-card {% if match.is_live %}live{% endif %}">
+                        <div class="schedule-time">
+                            <span class="time">{{ match.match_time or 'TBD' }}</span>
+                            {% if match.is_live %}
+                            <span class="live-indicator-small"></span>
+                            {% endif %}
+                        </div>
+                        <div class="schedule-teams">
+                            <div class="schedule-team">
+                                <div class="team-mini-logo" style="background-color: {{ match.team1.logo_color }}">
+                                    {{ match.team1.short_name }}
+                                </div>
+                                <span class="team-name-schedule">{{ match.team1.name }}</span>
+                                {% if match.status != 'upcoming' %}
+                                <span class="team-score-schedule">{{ match.team1_score }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="vs-text">VS</div>
+                            <div class="schedule-team">
+                                <div class="team-mini-logo" style="background-color: {{ match.team2.logo_color }}">
+                                    {{ match.team2.short_name }}
+                                </div>
+                                <span class="team-name-schedule">{{ match.team2.name }}</span>
+                                {% if match.status != 'upcoming' %}
+                                <span class="team-score-schedule">{{ match.team2_score }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="schedule-info">
+                            <span class="sport-mini-badge">{{ match.sport.name }}</span>
+                            <span class="tournament-name">{{ match.tournament or match.match_details or '' }}</span>
+                            <span class="venue-text">{{ match.venue or '' }}</span>
+                        </div>
+                        <div class="schedule-status">
+                            {% if match.is_live %}
+                            <span class="status-badge live">LIVE</span>
+                            {% elif match.status == 'completed' %}
+                            <span class="status-badge completed">Completed</span>
+                            {% else %}
+                            <span class="status-badge upcoming">Upcoming</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-matches">
+            <h3>No matches scheduled</h3>
+            <p>Select a different sport or check back later.</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <footer class="footer">
+        <p>Sports Management System - Match Schedule</p>
+    </footer>
+</body>
+</html>
