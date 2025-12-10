@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player Stats</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <title>Player Stats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <nav class="navbar">
     <div class="nav-container">
-        <div class="logo">&#9917; Sports Live</div>
+        <div class="logo"><span class="logo-icon">&#9917;</span>Sports Live</div>
         <div class="nav-links">
             <a href="/" class="nav-link">Live Scores</a>
             <a href="/players" class="nav-link active">Player Stats</a>
@@ -20,42 +19,35 @@
 </nav>
 
 <main class="main-content">
-    <div class="hero-section">
-        <h1>Player Statistics</h1>
-        <p>Top players from all sports</p>
-    </div>
-
-    <div class="sport-filters">
-        <a href="?sport=all" class="filter-btn {% if selected_sport=='all' %}active{% endif %}">All Sports</a>
-        {% for sport in sports %}
-        <a href="?sport={{ sport.name }}" class="filter-btn {% if selected_sport==sport.name %}active{% endif %}">{{ sport.name }}</a>
-        {% endfor %}
-    </div>
-
+    <h1>Player Statistics</h1>
     <div class="players-grid">
         {% for player in players %}
         <div class="player-card">
             <div class="player-header">
-                <div class="player-jersey" style="background-color: {{ player.team.logo_color }}">{{ player.jersey_number }}</div>
-                <h3>{{ player.name }}</h3>
-                <p>{{ player.team.name }} - {{ player.position }}</p>
+                <div class="player-jersey">{{ player.jersey }}</div>
+                <div class="player-info">
+                    <div class="player-name">{{ player.name }}</div>
+                    <div class="player-team">{{ player.team }} - {{ player.position }}</div>
+                    <div class="player-meta">
+                        <span class="nationality">{{ player.nationality }}</span>
+                        <span class="position-badge">{{ player.sport }}</span>
+                    </div>
+                </div>
             </div>
             <div class="player-stats">
-                <p>Matches: {{ player.matches_played }}</p>
-                {% if player.team.sport.name=='Cricket' %}
-                <p>Runs: {{ player.runs }} | Wickets: {{ player.wickets }}</p>
-                {% elif player.team.sport.name=='Football' or player.team.sport.name=='Hockey' %}
-                <p>Goals: {{ player.goals }} | Assists: {{ player.assists }}</p>
-                {% elif player.team.sport.name=='Kabaddi' %}
-                <p>Raid: {{ player.raid_points }} | Tackle: {{ player.tackle_points }} | Total: {{ player.points }}</p>
-                {% elif player.team.sport.name=='Badminton' %}
-                <p>Smashes: {{ player.smashes }} | Aces: {{ player.aces }}</p>
+                {% if player.sport == "Cricket" %}
+                <div class="stat-item"><span class="stat-value">{{ player.runs }}</span><span class="stat-label">Runs</span></div>
+                <div class="stat-item"><span class="stat-value">{{ player.wickets }}</span><span class="stat-label">Wickets</span></div>
+                <div class="stat-item"><span class="stat-value">{{ player.matches }}</span><span class="stat-label">Matches</span></div>
+                {% elif player.sport == "Football" %}
+                <div class="stat-item"><span class="stat-value">{{ player.goals }}</span><span class="stat-label">Goals</span></div>
+                <div class="stat-item"><span class="stat-value">{{ player.assists }}</span><span class="stat-label">Assists</span></div>
+                <div class="stat-item"><span class="stat-value">{{ player.matches }}</span><span class="stat-label">Matches</span></div>
                 {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
 </main>
-<footer class="footer">Player Stats - Sports Management System</footer>
 </body>
 </html>
