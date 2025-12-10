@@ -33,9 +33,7 @@
         <div class="sport-filters">
             <a href="?sport=all" class="filter-btn {% if selected_sport == 'all' %}active{% endif %}">All Sports</a>
             {% for sport in sports %}
-            <a href="?sport={{ sport.name }}" class="filter-btn {% if selected_sport == sport.name %}active{% endif %}">
-                {{ sport.name }}
-            </a>
+            <a href="?sport={{ sport.name }}" class="filter-btn {% if selected_sport == sport.name %}active{% endif %}">{{ sport.name }}</a>
             {% endfor %}
         </div>
 
@@ -53,17 +51,13 @@
                     </div>
                     <div class="teams-container">
                         <div class="team">
-                            <div class="team-logo" style="background-color: {{ match.team1.logo_color }}">
-                                {{ match.team1.short_name }}
-                            </div>
+                            <div class="team-logo" style="background-color: {{ match.team1.logo_color }}">{{ match.team1.short_name }}</div>
                             <div class="team-name">{{ match.team1.name }}</div>
                             <div class="team-score">{{ match.team1_score }}</div>
                         </div>
                         <div class="vs-divider">VS</div>
                         <div class="team">
-                            <div class="team-logo" style="background-color: {{ match.team2.logo_color }}">
-                                {{ match.team2.short_name }}
-                            </div>
+                            <div class="team-logo" style="background-color: {{ match.team2.logo_color }}">{{ match.team2.short_name }}</div>
                             <div class="team-name">{{ match.team2.name }}</div>
                             <div class="team-score">{{ match.team2_score }}</div>
                         </div>
@@ -80,9 +74,7 @@
 
         {% if upcoming_matches %}
         <section class="matches-section">
-            <div class="section-header">
-                <h2>Upcoming Matches</h2>
-            </div>
+            <div class="section-header"><h2>Upcoming Matches</h2></div>
             <div class="matches-grid">
                 {% for match in upcoming_matches %}
                 <div class="match-card upcoming">
@@ -92,16 +84,12 @@
                     </div>
                     <div class="teams-container">
                         <div class="team">
-                            <div class="team-logo" style="background-color: {{ match.team1.logo_color }}">
-                                {{ match.team1.short_name }}
-                            </div>
+                            <div class="team-logo" style="background-color: {{ match.team1.logo_color }}">{{ match.team1.short_name }}</div>
                             <div class="team-name">{{ match.team1.name }}</div>
                         </div>
                         <div class="vs-divider">VS</div>
                         <div class="team">
-                            <div class="team-logo" style="background-color: {{ match.team2.logo_color }}">
-                                {{ match.team2.short_name }}
-                            </div>
+                            <div class="team-logo" style="background-color: {{ match.team2.logo_color }}">{{ match.team2.short_name }}</div>
                             <div class="team-name">{{ match.team2.name }}</div>
                         </div>
                     </div>
@@ -117,9 +105,7 @@
 
         {% if recent_matches %}
         <section class="matches-section">
-            <div class="section-header">
-                <h2>Recent Results</h2>
-            </div>
+            <div class="section-header"><h2>Recent Results</h2></div>
             <div class="matches-grid">
                 {% for match in recent_matches %}
                 <div class="match-card completed">
@@ -129,17 +115,13 @@
                     </div>
                     <div class="teams-container">
                         <div class="team">
-                            <div class="team-logo" style="background-color: {{ match.team1.logo_color }}">
-                                {{ match.team1.short_name }}
-                            </div>
+                            <div class="team-logo" style="background-color: {{ match.team1.logo_color }}">{{ match.team1.short_name }}</div>
                             <div class="team-name">{{ match.team1.name }}</div>
                             <div class="team-score">{{ match.team1_score }}</div>
                         </div>
                         <div class="vs-divider">VS</div>
                         <div class="team">
-                            <div class="team-logo" style="background-color: {{ match.team2.logo_color }}">
-                                {{ match.team2.short_name }}
-                            </div>
+                            <div class="team-logo" style="background-color: {{ match.team2.logo_color }}">{{ match.team2.short_name }}</div>
                             <div class="team-name">{{ match.team2.name }}</div>
                             <div class="team-score">{{ match.team2_score }}</div>
                         </div>
@@ -152,13 +134,6 @@
                 {% endfor %}
             </div>
         </section>
-        {% endif %}
-
-        {% if not live_matches and not upcoming_matches and not recent_matches %}
-        <div class="no-matches">
-            <h3>No matches found</h3>
-            <p>Check back later for updates or select a different sport.</p>
-        </div>
         {% endif %}
     </main>
 
@@ -181,10 +156,8 @@
                             if (details) details.textContent = match.match_details || '';
                         }
                     });
-                })
-                .catch(err => console.log('Error refreshing scores:', err));
+                }).catch(err => console.log(err));
         }
-
         setInterval(refreshLiveScores, 10000);
     </script>
 </body>
