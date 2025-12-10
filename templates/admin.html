@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <nav class="navbar">
     <div class="nav-container">
-        <div class="logo">&#9917; Sports Live</div>
+        <div class="logo"><span class="logo-icon">&#9917;</span>Sports Live</div>
         <div class="nav-links">
             <a href="/" class="nav-link">Live Scores</a>
             <a href="/players" class="nav-link">Player Stats</a>
@@ -19,37 +18,45 @@
     </div>
 </nav>
 
-<main class="main-content">
-    <h1>Admin Panel</h1>
+<main class="main-content admin-content">
+    <div class="admin-header">
+        <h1>Admin Panel</h1>
+        <p>Manage matches and tournaments</p>
+    </div>
 
-    <h2>All Matches</h2>
-    <table border="1" cellpadding="5">
-        <thead>
-            <tr>
-                <th>Sport</th>
-                <th>Team 1</th>
-                <th>Score</th>
-                <th>Team 2</th>
-                <th>Score</th>
-                <th>Status</th>
-                <th>Venue</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for match in matches %}
-            <tr {% if match.is_live %}style="background-color:#ffcccc"{% endif %}>
-                <td>{{ match.sport.name }}</td>
-                <td>{{ match.team1.name }}</td>
-                <td>{{ match.team1_score }}</td>
-                <td>{{ match.team2.name }}</td>
-                <td>{{ match.team2_score }}</td>
-                <td>{{ match.status|capitalize }}</td>
-                <td>{{ match.venue }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="admin-grid">
+        <div class="admin-section full-width">
+            <h2>All Matches</h2>
+            <div class="matches-table-container">
+                <table class="matches-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sport</th>
+                            <th>Teams</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Tournament</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in matches %}
+                        <tr class="{% if match.is_live %}live-row{% endif %}">
+                            <td>{{ match.id }}</td>
+                            <td>{{ match.sport.name }}</td>
+                            <td>{{ match.team1.short_name }} VS {{ match.team2.short_name }}</td>
+                            <td>{{ match.match_date.strftime('%d-%b-%Y') }}</td>
+                            <td>{{ match.match_time }}</td>
+                            <td><span class="status-badge {% if match.status == 'completed' %}completed{% elif match.is_live %}live{% else %}upcoming{% endif %}">{{ match.status|capitalize }}</span></td>
+                            <td>{{ match.tournament }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </main>
-<footer class="footer">Admin Panel - Sports Management System</footer>
 </body>
 </html>
