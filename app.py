@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -97,15 +97,13 @@ matches = [
 
 # ----- Players -----
 players = [
-    # Cricket players
     {"name": "MS Dhoni", "team": "CSK", "jersey": 7, "position": "Batsman", "nationality": "India", "sport": "Cricket", "runs": 478, "wickets": 0, "matches": 7},
     {"name": "Rohit Sharma", "team": "MI", "jersey": 45, "position": "Batsman", "nationality": "India", "sport": "Cricket", "runs": 512, "wickets": 0, "matches": 7},
-    # Football players
     {"name": "Sunil Chhetri", "team": "BFC", "jersey": 11, "position": "Forward", "nationality": "India", "sport": "Football", "goals": 6, "assists": 2, "matches": 5},
     {"name": "Roy Krishna", "team": "ATKMB", "jersey": 9, "position": "Forward", "nationality": "Fiji", "sport": "Football", "goals": 5, "assists": 3, "matches": 5},
 ]
 
-# ----------------- ROUTES -----------------
+# ---------------- ROUTES ----------------
 
 @app.route("/")
 def index():
@@ -115,42 +113,16 @@ def index():
 @app.route("/schedule")
 def schedule():
     sport_filter = request.args.get("sport", "all")
-    if sport_filter != "all":
-        filtered = [m for m in matches if m["sport"]["name"] == sport_filter]
-    else:
-        filtered = matches
+    filtered = matches if sport_filter == "all" else [m for m in matches if m["sport"]["name"] == sport_filter]
     return render_template("schedule.html", matches=filtered, sports=sports, selected_sport=sport_filter)
 
 @app.route("/players")
-def player_stats():
+def players_page():
     return render_template("players.html", players=players)
 
 @app.route("/admin")
-def admin_panel():
+def admin():
     return render_template("admin.html", matches=matches, sports=sports)
-
-# ----- API for teams -----
-@app.route("/api/teams/<int:sport_id>")
-def api_teams(sport_id):
-    return jsonify(teams.get(sport_id, []))
-
-# ----- API to create/update/delete match (dummy) -----
-@app.route("/api/matches", methods=["POST"])
-def create_match():
-    return jsonify({"success": True})
-
-@app.route("/api/matches/<int:match_id>")
-def get_match(match_id):
-    match = next((m for m in matches if m["id"] == match_id), None)
-    return jsonify(match)
-
-@app.route("/api/matches/<int:match_id>/score", methods=["PUT"])
-def update_score(match_id):
-    return jsonify({"success": True})
-
-@app.route("/api/matches/<int:match_id>", methods=["DELETE"])
-def delete_match(match_id):
-    return jsonify({"success": True})
 
 if __name__ == "__main__":
     app.run(debug=True)
